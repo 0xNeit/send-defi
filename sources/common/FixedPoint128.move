@@ -1,8 +1,8 @@
-address swapadmin {
+address admin {
 
 module FixedPoint128 {
     use std::error;
-    use swapadmin::U256::{Self, U256};
+    use admin::U256::{Self, U256};
 
     const RESOLUTION: u8 = 128;
     const Q128: u128 = 340282366920938463463374607431768211455u128; // 2**128

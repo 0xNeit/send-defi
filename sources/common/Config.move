@@ -1,7 +1,8 @@
-address swapadmin {
+address admin {
 /// The module provides a general implmentation of configuration for onchain contracts.    
 module Config {
     use std::event;
+    use aptos_framework::account;
     use std::signer;
     use std::option::{Self, Option};
     use std::error;
@@ -149,7 +150,7 @@ module Config {
         move_to(account, Config<ConfigValue>{ payload });
         let cap = ModifyConfigCapability<ConfigValue> {
             account_address: signer::address_of(account),
-            events: event::new_event_handle<ConfigChangeEvent<ConfigValue>>(account),
+            events: account::new_event_handle<ConfigChangeEvent<ConfigValue>>(account),
         };
         move_to(account, ModifyConfigCapabilityHolder{cap: option::some(cap)});
     }

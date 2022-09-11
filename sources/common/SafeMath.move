@@ -1,9 +1,9 @@
-address swapadmin {
+address admin {
 
 module SafeMath {
     use std::error;
-    use swapadmin::Math;
-    use swapadmin::U256::{Self, U256};
+    use admin::Math;
+    use admin::U256::{Self, U256};
 
     const EXP_SCALE_9: u128 = 1000000000;// e9
     const EXP_SCALE_10: u128 = 10000000000;// e10

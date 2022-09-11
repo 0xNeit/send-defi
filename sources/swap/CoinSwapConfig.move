@@ -1,14 +1,14 @@
 // Copyright (c) Send DeFi
 // SPDX-License-Identifier: Apache-2.0
 
-address swapadmin {
+address admin {
 
 module CoinSwapConfig {
     use std::signer;
     use std::error;
     use std::vector;
     use std::option;
-    use swapadmin::Config;
+    use admin::Config;
 
     // Numerator and denumerator default fixed value
     const DEFAULT_OPERATION_NUMERATOR: u64 = 10;
@@ -336,11 +336,11 @@ module CoinSwapConfig {
     }
 
     public fun admin_address(): address {
-        @swapadmin
+        @admin
     }
 
     public fun fee_address(): address {
-        @swapadmin
+        @admin
     }
 
     public fun assert_admin(signer: &signer) {

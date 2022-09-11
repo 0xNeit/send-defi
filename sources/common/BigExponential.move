@@ -1,8 +1,8 @@
-address swapadmin {
+address admin {
 
 module BigExponential {
     use std::error;
-    use swapadmin::U256::{Self, U256};
+    use admin::U256::{Self, U256};
 
     // e18
     const EQUAL: u8 = 0;

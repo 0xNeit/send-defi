@@ -1,4 +1,4 @@
-address swapadmin {
+address admin {
 /// Implementation of FixedPoint u64 in Move language.
 module FixedPoint64 {
     // Error codes.

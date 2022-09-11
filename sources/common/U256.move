@@ -1,4 +1,4 @@
-address swapadmin {
+address admin {
 /// The implementation of large numbers written in Move language.
 /// Code derived from original work by Andrew Poelstra <apoelstra@wpsoftware.net>
 ///

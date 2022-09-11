@@ -6,4 +6,4 @@ git = 'https://github.com/davidiw/aptos-core.git'
 rev = 'conversions'
 subdir = 'aptos-move/framework/aptos-framework'
 [addresses]
-swapadmin = '0xedf2c8addd8c2d48f3975fc6171c5b654d730688036115bdb5746e2c791046e5'
+admin = '0xedf2c8addd8c2d48f3975fc6171c5b654d730688036115bdb5746e2c791046e5'

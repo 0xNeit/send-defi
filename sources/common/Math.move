@@ -1,4 +1,4 @@
-address swapadmin {
+address admin {
 
 module Math {
     use std::vector;
