@@ -8,6 +8,9 @@ module SafeMath {
     const EXP_SCALE_9: u128 = 1000000000;// e9
     const EXP_SCALE_10: u128 = 10000000000;// e10
     const EXP_SCALE_18: u128 = 1000000000000000000;// e18
+    const EXP_SCALE_U64_9: u64 = 1000000000;// e9
+    const EXP_SCALE_U64_10: u64 = 10000000000;// e10
+    const EXP_SCALE_U64_18: u64 = 1000000000000000000;// e18
     const U64_MAX:u64 = 18446744073709551615;  //length(U64_MAX)==20
     const U128_MAX:u128 = 340282366920938463463374607431768211455;  //length(U128_MAX)==39
 
@@ -28,6 +31,32 @@ module SafeMath {
             abort error::invalid_argument(ERR_U128_OVERFLOW)
         };
         U256::as_u128(r_u256)
+    }
+
+    public fun mul_div_u64(x: u64, y: u64, z: u64): U256 {
+        if ( z == 0) {
+            abort error::invalid_argument(ERR_DIVIDE_BY_ZERO)
+        };
+
+        if (x <= EXP_SCALE_U64_18 && y <= EXP_SCALE_U64_18) {
+            return U256::from_u64(x * y / z)
+        };
+
+        let x_u256 = U256::from_u64(x);
+        let y_u256 = U256::from_u64(y);
+        let z_u256 = U256::from_u64(z);
+        U256::div(U256::mul(x_u256, y_u256), z_u256)
+    }
+
+    public fun safe_mul_div_u64(x: u64, y: u64, z: u64): u64 {
+        let r_u128 = mul_div_u64(x, y, z);
+
+        let u64_max = U256::from_u64(U64_MAX);
+        let cmp_order = U256::compare(&r_u128, &u64_max);
+        if (cmp_order == GREATER_THAN) {
+            abort error::invalid_argument(ERR_U128_OVERFLOW)
+        };
+        U256::as_u64(r_u128)
     }
 
     public fun mul_div_u128(x: u128, y: u128, z: u128): U256 {
@@ -74,6 +103,12 @@ module SafeMath {
     public fun safe_compare_mul_u128(x1: u128, y1: u128, x2: u128, y2: u128): u8 {
         let r1 = U256::mul(U256::from_u128(x1), U256::from_u128(y1));
         let r2 = U256::mul(U256::from_u128(x2), U256::from_u128(y2));
+        U256::compare(&r1, &r2)
+    }
+
+    public fun safe_compare_mul_u64(x1: u64, y1: u64, x2: u64, y2:u64): u8 {
+        let r1 = U256::mul(U256::from_u64(x1), U256::from_u64(y1));
+        let r2 = U256::mul(U256::from_u64(x2), U256::from_u64(y2));
         U256::compare(&r1, &r2)
     }
 
