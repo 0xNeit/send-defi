@@ -127,6 +127,13 @@ module CoinSwap {
         };
     }
 
+    /// Check if swap pair exists
+    public fun swap_pair_exists<X: copy + drop + store, Y: copy + drop + store>(): bool {
+        let order = compare_coin<X, Y>();
+        assert!(order != 0, ERROR_SWAP_INVALID_TOKEN_PAIR);
+        coin::is_coin_initialized<LiquidityToken<X, Y>>()
+    }
+
     fun assert_admin(signer: &signer) {
         assert!(signer::address_of(signer) == CoinSwapConfig::admin_address(), ERROR_SWAP_PRIVILEGE_INSUFFICIENT);
     }
@@ -359,6 +366,96 @@ module CoinSwap {
         let (fee_numerator, fee_denominator) = CoinSwapConfig::get_poundage_rate<X, Y>();
         let (operation_numerator, operation_denominator) = CoinSwapConfig::get_swap_fee_operation_rate_v2<X, Y>();
         (fee_numerator * operation_numerator, fee_denominator * operation_denominator)
+    }
+
+    /// Emit token pair register event
+    fun emit_token_pair_register_event<X: copy + drop + store, Y: copy + drop + store>(
+        signer: &signer,
+    ) acquires CoinSwapEventHandle {
+        let event_handle = borrow_global_mut<CoinSwapEventHandle>(CoinSwapConfig::admin_address());
+        event::emit_event(&mut event_handle.register_event, RegisterEvent{
+            x_token_type: type_of<X>(),
+            y_token_type: type_of<Y>(),
+            signer: signer::address_of(signer),
+        });
+    }
+
+    /// if swap fee deposit to fee address fail, return back to lp pool
+    public fun return_back_to_lp_pool<X: copy + drop + store, Y: copy + drop + store>(
+        x_in: coin::Coin<X>,
+        y_in: coin::Coin<Y>,
+    ) {
+        let admin_address = CoinSwapConfig::admin_address();
+        // let token_pair = borrow_global_mut<Pair<X, Y>>(admin_address);
+        coin::deposit(admin_address, x_in);
+        coin::deposit(admin_address, y_in);
+    }
+
+    /// Do mint and emit `AddLiquidityEvent` event
+    public fun mint_and_emit_event<X: copy + drop + store, Y: copy + drop + store>(
+        signer: &signer,
+        x_token: coin::Coin<X>,
+        y_token: coin::Coin<Y>,
+        amount_x_desired: u64,
+        amount_y_desired: u64,
+        amount_x_min: u64,
+        amount_y_min: u64): coin::Coin<LiquidityToken<X, Y>>
+    acquires Pair, LiquidityTokenCapability, CoinSwapEventHandle {
+        let liquidity_token = mint<X, Y>(x_token, y_token);
+
+        let event_handle = borrow_global_mut<CoinSwapEventHandle>(CoinSwapConfig::admin_address());
+        event::emit_event(&mut event_handle.add_liquidity_event, AddLiquidityEvent{
+            x_token_type: type_of<X>(),
+            y_token_type: type_of<Y>(),
+            signer: signer::address_of(signer),
+            liquidity: coin::value<LiquidityToken<X, Y>>(&liquidity_token),
+            amount_x_desired,
+            amount_y_desired,
+            amount_x_min,
+            amount_y_min,
+        });
+        liquidity_token
+    }
+
+    /// Do burn and emit `RemoveLiquidityEvent` event
+    public fun burn_and_emit_event<X: copy + drop + store, Y: copy + drop + store>(
+        signer: &signer,
+        to_burn: coin::Coin<LiquidityToken<X, Y>>,
+        amount_x_min: u64,
+        amount_y_min: u64)
+    : (coin::Coin<X>, coin::Coin<Y>) acquires Pair, LiquidityTokenCapability, CoinSwapEventHandle {
+        let liquidity = coin::value<LiquidityToken<X, Y>>(&to_burn);
+        let (x_token, y_token) = burn<X, Y>(to_burn);
+
+        let event_handle = borrow_global_mut<CoinSwapEventHandle>(CoinSwapConfig::admin_address());
+        event::emit_event(&mut event_handle.remove_liquidity_event, RemoveLiquidityEvent{
+            x_token_type: type_of<X>(),
+            y_token_type: type_of<Y>(),
+            signer: signer::address_of(signer),
+            liquidity,
+            amount_x_min,
+            amount_y_min,
+        });
+        (x_token, y_token)
+    }
+
+    /// Do swap and emit `SwapEvent` event
+    public fun swap_and_emit_event<X: copy + drop + store, Y: copy + drop + store>(
+        signer: &signer,
+        x_in: coin::Coin<X>,
+        y_out: u64,
+        y_in: coin::Coin<Y>,
+        x_out: u64): (coin::Coin<X>, coin::Coin<Y>, coin::Coin<X>, coin::Coin<Y>) acquires Pair, CoinSwapEventHandle {
+        let (token_x_out, token_y_out, token_x_fee, token_y_fee) = swap<X, Y>(x_in, y_out, y_in, x_out);
+        let event_handle = borrow_global_mut<CoinSwapEventHandle>(CoinSwapConfig::admin_address());
+        event::emit_event(&mut event_handle.swap_event, SwapEvent{
+            x_token_type: type_of<X>(),
+            y_token_type: type_of<Y>(),
+            signer: signer::address_of(signer),
+            x_in: coin::value<X>(&token_x_out),
+            y_out: coin::value<Y>(&token_y_out),
+        });
+        (token_x_out, token_y_out, token_x_fee, token_y_fee)
     }
 
 } 
