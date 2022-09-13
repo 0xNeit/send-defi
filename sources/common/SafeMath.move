@@ -33,6 +33,17 @@ module SafeMath {
         U256::as_u128(r_u256)
     }
 
+    public fun safe_mul_div_u64(x: u64, y: u64, z: u64): u64 {
+        let r_u128 = mul_div_u64(x, y, z);
+
+        let u64_max = U256::from_u64(U64_MAX);
+        let cmp_order = U256::compare(&r_u128, &u64_max);
+        if (cmp_order == GREATER_THAN) {
+            abort error::invalid_argument(ERR_U128_OVERFLOW)
+        };
+        U256::as_u64(r_u128)
+    }
+
     public fun mul_div_u64(x: u64, y: u64, z: u64): U256 {
         if ( z == 0) {
             abort error::invalid_argument(ERR_DIVIDE_BY_ZERO)
@@ -46,17 +57,6 @@ module SafeMath {
         let y_u256 = U256::from_u64(y);
         let z_u256 = U256::from_u64(z);
         U256::div(U256::mul(x_u256, y_u256), z_u256)
-    }
-
-    public fun safe_mul_div_u64(x: u64, y: u64, z: u64): u64 {
-        let r_u128 = mul_div_u64(x, y, z);
-
-        let u64_max = U256::from_u64(U64_MAX);
-        let cmp_order = U256::compare(&r_u128, &u64_max);
-        if (cmp_order == GREATER_THAN) {
-            abort error::invalid_argument(ERR_U128_OVERFLOW)
-        };
-        U256::as_u64(r_u128)
     }
 
     public fun mul_div_u128(x: u128, y: u128, z: u128): U256 {

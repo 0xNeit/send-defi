@@ -46,7 +46,7 @@ module Math {
     /// does not matter for the verification of callers.
     spec fun spec_sqrt(): u128;
 
-    /// calculate the `y` pow of `x`.
+    /// calculate the `y` pow of `x`
     public fun pow(x: u64, y: u64): u128 {
         let result = 1u128;
         let z = y;
@@ -61,16 +61,22 @@ module Math {
         result
     }
 
-    spec pow {
-        pragma opaque = true;
-        pragma verify = false; //while loop
-        aborts_if [abstract] false;
-        ensures [abstract] result == spec_pow();
-    }
 
     /// We use an uninterpreted function to represent the result of pow. The actual value
     /// does not matter for the verification of callers.
     spec fun spec_pow(): u128;
+
+    /// calculate the `y` pow of `x` and return a u64
+    public fun pow_u64(x: u64, y: u64): u64 {
+        let result = 1;
+        while (y > 0) {
+            if (y & 1 > 0) result = result * x;
+            y = y >> 1;
+            x = x * x;
+        };
+
+        result
+    }
 
     /// https://medium.com/coinmonks/math-in-solidity-part-3-percents-and-proportions-4db014e080b1
     /// calculate x * y /z with as little loss of precision as possible and avoid overflow
