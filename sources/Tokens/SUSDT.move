@@ -17,7 +17,7 @@ module SUSDT {
     /// Account has no capabilities (burn/mint).
     const ENO_CAPABILITIES: u64 = 1;
 
-    const BASE_COIN_NAME: vector<u8> = b"Aptos Pegged UST";
+    const BASE_COIN_NAME: vector<u8> = b"Aptos Pegged USDT";
 
     const BASE_COIN_SYMBOL: vector<u8> = b"USDT";
 
